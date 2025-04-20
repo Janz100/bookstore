@@ -23,32 +23,27 @@ exports.registerUser = async (req, res) => {
 // Login
 exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
-
+    const adminEmail = process.env.ADMIN_EMAIL;
     try {
-        // Check if user exists
-        const user = await db.oneOrNone('SELECT * FROM users WHERE email = $1', [email]);
-
+        const user = await db.oneOrNone('SELECT * FROM users WHERE email =$1', [email]);
         if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        // Compare passwords
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        // Set session
-        req.session.user = { id: user.id, name: user.name, email: user.email };
-
-        // Corrected res.redirect syntax
-        res.redirect(302, '/home');
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error logging in' });
     }
-};
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    req.session.user = { id: user.id, name: user.name, email: user.email };
+    // Redirect based on role
+    if (user.email === adminEmail) {
+        return res.redirect('/admin/dashboard');
+    }
+    res.redirect('/home');
+ } catch (err) {
+    res.status(500).json({ error: 'Error logging in' });
+    }
+};   
 
 // Logout
 exports.logoutUser = (req, res) => {

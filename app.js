@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const homeRoutes = require('./routes/homeRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const bookRoutes = require("./routes/bookRoutes"); 
+const adminRoutes = require('./routes/adminRoutes');
 
 
 //load environment variables
@@ -32,7 +33,7 @@ app.use(session({
         maxAge: 60 * 60 * 1000 //session expries after 1 hour
     }
 }));
-
+app.use('/', adminRoutes);
 
 // Set view engine to EJS
 app.set('view engine', 'ejs');
